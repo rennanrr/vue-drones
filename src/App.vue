@@ -1,18 +1,18 @@
 <template>
-  <div id="app">
-    <nav class="navbar navbar-expand navbar-dark bg-dark">
-      <a href="#" class="navbar-brand">Rennan</a>
-      <div class="navbar-nav mr-auto">
+  <div id="app" class="mt-0">
+    <nav class="navbar navbar-expand text-white bg-dark border border-dark justify-content-between">
+      <div class="navbar-nav text-white">
         <li class="nav-item">
-          <a href="/drones" class="nav-link">Drones</a>
+          <a href="/drones" class="navbar-brand">Drones</a>
         </li>
         <li class="nav-item">
-          <a href="/create" class="nav-link">Adicionar novo drone</a>
+          <a href="/create" class="navbar-brand">Adicionar novo drone</a>
         </li>
       </div>
+      <a class="navbar-brand">Teste de seleção Full-Stack SoluCX- 2020-01J (Rennan Ribas)</a>
     </nav>
 
-    <div class="container mt-3">
+    <div class="container mt-3 mb-3">
       <router-view />
     </div>
   </div>
@@ -20,15 +20,12 @@
 
 <script>
 import Vue from 'vue';
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
+import { BootstrapVue } from 'bootstrap-vue';
 
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+import './assets/styles/custom.scss'
 
 // Install BootstrapVue
 Vue.use(BootstrapVue)
-// Optionally install the BootstrapVue icon components plugin
-Vue.use(IconsPlugin)
 
 export default {
   name: 'app'

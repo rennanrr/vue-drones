@@ -1,6 +1,6 @@
 <template>
-  <div class="submit-form">
-    <div v-if="!submitted">
+  <div class="row">
+    <div class="col-8 text-left" v-if="!submitted">
       <div class="form-group">
         <label for="title">Imagem</label>
         <input
@@ -12,85 +12,99 @@
           name="title"
         />
       </div>
+      <div class="row">
+        <div class="form-group col-4">
+          <label for="description">Nome</label>
+          <input
+            class="form-control"
+            id="description"
+            required
+            v-model="drone.name"
+            name="description"
+          />
+        </div>
 
-      <div class="form-group">
-        <label for="description">Nome</label>
-        <input
-          class="form-control"
-          id="description"
-          required
-          v-model="drone.name"
-          name="description"
-        />
+        <div class="form-group col-8">
+          <label for="description">Endereço</label>
+          <input
+            class="form-control"
+            id="description"
+            required
+            v-model="drone.address"
+            name="description"
+          />
+        </div>
       </div>
+      
+      <div class="row">
+        <div class="form-group col-6">
+          <label for="description">Bateria</label>
+          <b-input-group>
+            <b-form-input d="battery"  v-model="drone.battery" name="battery"
+            type="range" min="0" max="100"></b-form-input>
+            <b-input-group-append>
+              <b-button disabled> 
+                {{ drone.battery }} %
+              </b-button>
+            </b-input-group-append>
+          </b-input-group>
+        </div>
+        
+        <div class="form-group col-3">
+          <label for="description">Velocidade máxima</label>
+          <input
+            type="number"
+            class="form-control"
+            id="description"
+            required
+            v-model="drone.max_speed"
+            name="description"
+          />
+        </div>
+        
+        <div class="form-group col-3">
+          <label for="description">Velocidade média</label>
+          <input
+            type="number"
+            class="form-control"
+            id="description"
+            required
+            v-model="drone.average_speed"
+            name="description"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group col-6">
+          <label for="description">Status</label>
+          <b-form-select id="status" name="status" v-model="drone.status" >
+            <b-form-select-option value="Success">Success</b-form-select-option>
+            <b-form-select-option value="Delayed">Delayed</b-form-select-option>
+            <b-form-select-option value="Flying">Flying</b-form-select-option>
+            <b-form-select-option value="Fail">Fail</b-form-select-option>
+            <b-form-select-option value="Offline">Offline</b-form-select-option>
+            <b-form-select-option value="Charging">Charging</b-form-select-option>
+          </b-form-select>
+        </div>
 
-      <div class="form-group">
-        <label for="description">Endereço</label>
-        <input
-          class="form-control"
-          id="description"
-          required
-          v-model="drone.address"
-          name="description"
-        />
-      </div>
-      
-      <div class="form-group">
-        <label for="description">Bateria</label>
-        <input
-          class="form-control"
-          id="description"
-          required
-          v-model="drone.battery"
-          name="description"
-        />
-      </div>
-      
-      <div class="form-group">
-        <label for="description">Velocidade máxima</label>
-        <input
-          class="form-control"
-          id="description"
-          required
-          v-model="drone.max_speed"
-          name="description"
-        />
-      </div>
-      
-      <div class="form-group">
-        <label for="description">Velocidade média</label>
-        <input
-          class="form-control"
-          id="description"
-          required
-          v-model="drone.average_speed"
-          name="description"
-        />
-      </div>
-      
-      <div class="form-group">
-        <label for="description">Status</label>
-        <input
-          class="form-control"
-          id="description"
-          required
-          v-model="drone.status"
-          name="status"
-        />
-      </div>
-      
-      <div class="form-group">
-        <label for="description">Posição atual</label>
-        <b-form-input id="fly" v-model="drone.fly" name="fly" type="range" min="0" max="100"></b-form-input>
-        <div class="mt-2">{{ drone.fly }}</div>
+        <div class="form-group col-6">
+          <label for="description">Posição atual</label>
+          <b-input-group>
+            <b-form-input id="fly"  v-model="drone.fly" name="fly" 
+              type="range" min="0" max="100"></b-form-input>
+              <b-input-group-append><b-button disabled> {{ drone.fly }} </b-button></b-input-group-append>
+          </b-input-group>
+        </div>
       </div>
 
       <button @click="createDrone" class="btn btn-success">Cadastrar</button>
     </div>
+    <img v-if="drone.image && !submitted" :src="drone.image" class="img-fluid col-4" alt="Drone image">
 
-    <div v-else>
-      <h4>You submitted successfully!</h4>
-      <button class="btn btn-success" @click="newDrone">Add</button>
+    <div class="text-center" v-if="submitted">
+      <h4>Drone cadastrado com sucesso!</h4>
+      <button class="btn btn-info m-2" @click="newDrone">Cadastrar outro</button>
+      <a class="btn btn-success m-2" href="/drones">Voltar à lista</a>
     </div>
   </div>
 </template>
@@ -107,11 +121,11 @@ export default {
         image: "",
         name: "",
         address: "",
-        battery: "",
-        max_speed: "",
-        average_speed: "",
-        status: "",
-        fly: ""
+        battery: 0,
+        max_speed: null,
+        average_speed: null,
+        status: null,
+        fly: 0
       },
       submitted: false
     };
@@ -144,7 +158,17 @@ export default {
     
     newDrone() {
       this.submitted = false;
-      this.drone = {};
+      this.drone =  {
+        id: "",
+        image: "",
+        name: "",
+        address: "",
+        battery: 0,
+        max_speed: null,
+        average_speed: null,
+        status: null,
+        fly: 0
+      };
     }
   }
 };
