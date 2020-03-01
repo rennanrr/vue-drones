@@ -75,19 +75,14 @@
           id="description"
           required
           v-model="drone.status"
-          name="description"
+          name="status"
         />
       </div>
       
       <div class="form-group">
         <label for="description">Posição atual</label>
-        <input
-          class="form-control"
-          id="description"
-          required
-          v-model="drone.fly"
-          name="description"
-        />
+        <b-form-input id="fly" v-model="drone.fly" name="fly" type="range" min="0" max="100"></b-form-input>
+        <div class="mt-2">{{ drone.fly }}</div>
       </div>
 
       <button @click="createDrone" class="btn btn-success">Cadastrar</button>
