@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-8 text-left" v-if="!submitted">
       <div class="form-group">
-        <label for="title">Imagem</label>
+        <label>Imagem</label>
         <input
           type="text"
           class="form-control"
@@ -14,31 +14,35 @@
       </div>
       <div class="row">
         <div class="form-group col-4">
-          <label for="description">Nome</label>
-          <input
-            class="form-control"
-            id="description"
-            required
+          <label>Nome</label>
+          <b-form-input
+            id="input-live"
             v-model="drone.name"
-            name="description"
-          />
+            :state="errors.name"
+            aria-describedby="input-live-help input-live-feedback"
+            placeholder="Ex: Jonathan"
+            trim
+            v-on:input="testInput('name')"
+          ></b-form-input>
         </div>
 
         <div class="form-group col-8">
-          <label for="description">Endereço</label>
-          <input
-            class="form-control"
-            id="description"
-            required
+          <label>Endereço</label>
+          <b-form-input
+            id="input-live"
             v-model="drone.address"
-            name="description"
-          />
+            :state="errors.address"
+            aria-describedby="input-live-help input-live-feedback"
+            placeholder="Ex: Av. São João"
+            trim
+            v-on:input="testInput('address')"
+          ></b-form-input>
         </div>
       </div>
       
       <div class="row">
         <div class="form-group col-6">
-          <label for="description">Bateria</label>
+          <label>Bateria</label>
           <b-input-group>
             <b-form-input d="battery"  v-model="drone.battery" name="battery"
             type="range" min="0" max="100"></b-form-input>
@@ -51,7 +55,7 @@
         </div>
         
         <div class="form-group col-3">
-          <label for="description">Velocidade máxima</label>
+          <label>Velocidade máxima</label>
           <input
             type="number"
             class="form-control"
@@ -63,7 +67,7 @@
         </div>
         
         <div class="form-group col-3">
-          <label for="description">Velocidade média</label>
+          <label>Velocidade média</label>
           <input
             type="number"
             class="form-control"
@@ -76,7 +80,7 @@
       </div>
       <div class="row">
         <div class="form-group col-6">
-          <label for="description">Status</label>
+          <label>Status</label>
           <b-form-select id="status" name="status" v-model="drone.status" >
             <b-form-select-option value="Success">Success</b-form-select-option>
             <b-form-select-option value="Delayed">Delayed</b-form-select-option>
@@ -88,7 +92,7 @@
         </div>
 
         <div class="form-group col-6">
-          <label for="description">Posição atual</label>
+          <label>Posição atual</label>
           <b-input-group>
             <b-form-input id="fly"  v-model="drone.fly" name="fly" 
               type="range" min="0" max="100"></b-form-input>
@@ -97,7 +101,8 @@
         </div>
       </div>
 
-      <button @click="createDrone" class="btn btn-success">Cadastrar</button>
+      <button :disabled="!(this.errors.name || this.errors.address || this.errors.status)" 
+        @click="createDrone" class="btn btn-success">Cadastrar</button>
     </div>
     <img v-if="drone.image && !submitted" :src="drone.image" class="img-fluid col-4" alt="Drone image">
 
@@ -111,6 +116,7 @@
 
 <script>
 import DroneService from "../services/DroneService";
+import Joi from '@hapi/joi';
 
 export default {
   name: "drone-create",
@@ -127,7 +133,8 @@ export default {
         status: null,
         fly: 0
       },
-      submitted: false
+      submitted: false,
+      errors: {name: null, address: null, status: null}
     };
   },
   methods: {
@@ -147,15 +154,29 @@ export default {
       DroneService.create(data)
         .then(response => {
           this.drone.id = response.data.id;
-          console.log(response.data);
+          this.submitted = true;
         })
         .catch(e => {
-          console.log(e);
+          this.errors = e.response.data;
+          this.toast('Preencha corretamente os campos obrigatórios! :D', 
+            'Campos inválidos', 'danger');
+          this.errors.name = this.errors.name ? true : false;
+          this.errors.address = this.errors.address ? true : false;
+          this.errors.status = this.errors.status ? true : false;
+          
+          console.log(e.response.data);
         });
-
-      this.submitted = true;
     },
-    
+
+    toast(message, title, type) {
+      this.$bvToast.toast(message, {
+        title: title,
+        toaster: 'b-toaster-top-center',
+        solid: false,
+        variant: type
+      });
+    },
+
     newDrone() {
       this.submitted = false;
       this.drone =  {
@@ -169,6 +190,15 @@ export default {
         status: null,
         fly: 0
       };
+    },
+
+    testInput(input) {
+      if (input === 'name')
+        this.errors.name = Joi.string().min(2).max(20).required().validate(this.drone.name).error ? true : false;
+      if (input === 'address')
+        this.errors.address = Joi.string().min(2).max(20).required().validate(this.drone.address).error ? true : false;
+      if (input === 'status')
+        this.errors.status = Joi.string().min(2).max(20).required().validate(this.drone.status).error ? true : false;
     }
   }
 };
