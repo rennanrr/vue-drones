@@ -16,7 +16,7 @@
         <div class="form-group col-4">
           <label>Nome</label>
           <b-form-input
-            id="input-live"
+            id="name"
             v-model="drone.name"
             :state="errors.name"
             aria-describedby="input-live-help input-live-feedback"
@@ -29,7 +29,7 @@
         <div class="form-group col-8">
           <label>Endereço</label>
           <b-form-input
-            id="input-live"
+            id="address"
             v-model="drone.address"
             :state="errors.address"
             aria-describedby="input-live-help input-live-feedback"
@@ -81,7 +81,9 @@
       <div class="row">
         <div class="form-group col-6">
           <label>Status</label>
-          <b-form-select id="status" name="status" v-model="drone.status" >
+          <b-form-select id="status" name="status" v-model="drone.status" 
+            :state="errors.status" 
+            v-on:input="testInput('status')">
             <b-form-select-option value="Success">Success</b-form-select-option>
             <b-form-select-option value="Delayed">Delayed</b-form-select-option>
             <b-form-select-option value="Flying">Flying</b-form-select-option>
@@ -101,7 +103,7 @@
         </div>
       </div>
 
-      <button :disabled="!(this.errors.name || this.errors.address || this.errors.status)" 
+      <button :disabled="!(this.errors.name && this.errors.address && this.errors.status)" 
         @click="createDrone" class="btn btn-success">Cadastrar</button>
     </div>
     <img v-if="drone.image && !submitted" :src="drone.image" class="img-fluid col-4" alt="Drone image">
@@ -194,11 +196,14 @@ export default {
 
     testInput(input) {
       if (input === 'name')
-        this.errors.name = Joi.string().min(2).max(20).required().validate(this.drone.name).error ? true : false;
+        this.errors.name = Joi.string().min(2).max(20).required().validate(this.drone.name).error ? false : true;
       if (input === 'address')
-        this.errors.address = Joi.string().min(2).max(20).required().validate(this.drone.address).error ? true : false;
+        this.errors.address = Joi.string().min(2).max(20).required().validate(this.drone.address).error ? false : true;
       if (input === 'status')
-        this.errors.status = Joi.string().min(2).max(20).required().validate(this.drone.status).error ? true : false;
+        this.errors.status = Joi.string().min(2).max(20).required().validate(this.drone.status).error ? false : true;
+      console.log(this.errors.name);
+      console.log(this.errors.address);
+      console.log(this.errors.status);
     }
   }
 };
