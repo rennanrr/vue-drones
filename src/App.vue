@@ -3,10 +3,10 @@
     <nav class="navbar navbar-expand text-white bg-dark border border-dark justify-content-between">
       <div class="navbar-nav text-white">
         <li class="nav-item">
-          <a href="/drones" class="navbar-brand">Drones</a>
+          <a href="/drones" class="navbar-brand">Drone list</a>
         </li>
         <li class="nav-item">
-          <a href="/create" class="navbar-brand">Adicionar novo drone</a>
+          <a href="/create" class="navbar-brand">New drone</a>
         </li>
       </div>
       <a class="navbar-brand">Teste de seleção Full-Stack SoluCX- 2020-01J (Rennan Ribas)</a>

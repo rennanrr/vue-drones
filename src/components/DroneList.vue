@@ -1,22 +1,20 @@
 <template>
-  <div class="list row">
+  <div class="row">
     <div class="col-md-8">
       <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Buscar por texto"
-          v-model="text"/>
-        <div class="input-group-append">
-          <button class="btn btn-outline-secondary" type="button"
-            @click="findText"
-          >
-            Buscar
-          </button>
-        </div>
-      </div>
+        <b-form-input
+          id="name"
+          aria-describedby="input-live-help input-live-feedback"
+          placeholder="Type here to search"
+          trim
+          v-on:input="findText"
+        ></b-form-input>
+      </div>  
     </div>
-    <div class="col-md-6">
-      <h4>Drone List</h4>
+    <div class="col-md-12">
+      <h4>Drone list</h4>
       <b-table-simple hover small caption-top responsive>
-        <b-thead head-variant="dark">
+        <b-thead head-variant="blue">
           <b-tr>
             <b-th>DRONE</b-th>
             <b-th>CUSTOMER</b-th>
@@ -28,17 +26,39 @@
           </b-tr>
         </b-thead>
         <b-tbody>
-          <b-tr v-for="(drone, index) in drones" :key="index" @click="setActiveDrone(drone, index)">
-            <b-th>{{ drone.id }}</b-th>
-            <b-td>
-              <h5> {{ drone.name }} </h5>
-              <small>{{ drone.address }}</small>
+          <b-tr v-for="(drone, index) in drones" 
+            :key="index" @click="setActiveDrone(drone, index)">
+            <b-th style="vertical-align: middle;">{{ drone.id }}</b-th>
+            <b-td class="row text-left" style="vertical-align: middle;">
+              <div class="col-2">
+                <b-img fluid v-if="drone.image" class="border"
+                  :src="drone.image" rounded="circle" 
+                  alt="Profile image"></b-img>
+              </div>
+              <div class="col-8" style="vertical-align: middle;">
+                <h5 class="mb-0 pb-0"> {{ drone.name }} </h5>
+                <small class="mt-0 pt-0">{{ drone.address }}</small>
+              </div>
             </b-td>
-            <b-td>{{ drone.battery }}</b-td>
-            <b-td>{{ drone.max_speed }}</b-td>
-            <b-td>{{ drone.average_speed }}</b-td>
-            <b-td>{{ drone.fly }}</b-td>
-            <b-td>{{ drone.status }}</b-td>
+            <b-td style="vertical-align: middle;">
+              <b-progress :value="drone.battery" 
+              :variant="drone.battery > 80 ? 'success' : drone.battery > 30 ? 'warning' : 'danger'" 
+              :max="100" class="mb-3" :title="drone.battery + ' %'"
+              ></b-progress>
+            </b-td>
+            <b-td style="vertical-align: middle;">{{ drone.max_speed }} m/h</b-td>
+            <b-td style="vertical-align: middle;">{{ drone.average_speed }} m/h</b-td>
+            <b-td style="vertical-align: middle;">
+              <hr v-if="!drone.fly" class="col-5" style="border:1px dashed gray;">
+              <b-form-input id="fly"  v-model="drone.fly" name="fly" disabled
+                v-if="drone.fly" type="range" min="0" max="100" :title="drone.fly + ' %'"
+              ></b-form-input>
+            </b-td>
+            <b-td style="vertical-align: middle;">
+              <span :class="statusColor(drone.status.toUpperCase())">
+                {{ drone.status.toUpperCase() }}
+              </span>
+            </b-td>
           </b-tr>
         </b-tbody>
       </b-table-simple>
@@ -76,8 +96,7 @@ export default {
     return {
       drones: [],
       currentDrone: null,
-      currentIndex: -1,
-      text: ""
+      currentIndex: -1
     };
   },
   methods: {
@@ -85,7 +104,6 @@ export default {
       DroneService.list()
         .then(response => {
           this.drones = response.data;
-          console.log(response.data);
         })
         .catch(e => {
           console.log(e);
@@ -103,15 +121,25 @@ export default {
       this.currentIndex = index;
     },
     
-    findText() {
-      DroneService.find(this.text)
+    findText(text) {
+      DroneService.find(text)
         .then(response => {
           this.drones = response.data;
-          console.log(response.data);
         })
         .catch(e => {
           console.log(e);
         });
+    },
+
+    statusColor(status) {
+      switch (status) {
+        case 'SUCCESS': return 'badge badge-success';
+        case 'DELAYED': return 'badge badge-warning';
+        case 'FLYING': return 'badge badge-info';
+        case 'FAIL': return 'badge badge-danger';
+        case 'OFFLINE': return 'badge badge-secondary';
+        case 'CHARGING': return 'badge badge-primary';
+      }
     }
   },
   mounted() {

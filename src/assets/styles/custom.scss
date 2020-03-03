@@ -1,7 +1,7 @@
 
 @import 'node_modules/bootstrap/scss/bootstrap';
 @import 'node_modules/bootstrap-vue/src/index.scss';
-
+/* 
 $track-w: 12.5em;
 $track-h: .25em;
 $thumb-d: 1.5em;
@@ -39,10 +39,7 @@ $filll-c: red;
     &, &::-webkit-slider-thumb {
         -webkit-appearance: none;
     }
-    
-    --range: calc(var(--max) - var(--min));
-    --ratio: calc((var(--val) - var(--min))/var(--range));
-    --sx: calc(.5*#{$thumb-d} + var(--ratio)*(100% - #{$thumb-d}));
+
     margin: 0;
     padding: 0;
     width: $track-w; height: $thumb-d;
@@ -69,4 +66,4 @@ $filll-c: red;
     }
     
     &::-ms-tooltip { display: none }
-}
+} */
