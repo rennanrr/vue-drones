@@ -15,12 +15,12 @@ export default new Router({
     {
       path: '/drone/:id',
       name: 'drone-detail',
-      component: () => import('./components/DroneCreate')
+      component: () => import('./components/Drone')
     },
     {
       path: '/create',
       name: 'drone-create',
-      component: () => import('./components/DroneCreate')
+      component: () => import('./components/Drone')
     }
   ]
 });
