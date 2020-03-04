@@ -8,14 +8,14 @@ export default new Router({
   routes: [
     {
       path: '/',
-      alias: '/drones',
-      name: 'drones',
+      alias: '/drone-list',
+      name: 'drone-list',
       component: () => import('./components/DroneList')
     },
     {
-      path: '/drones/:id',
+      path: '/drone/:id',
       name: 'drone-detail',
-      component: () => import('./components/Drone')
+      component: () => import('./components/DroneCreate')
     },
     {
       path: '/create',

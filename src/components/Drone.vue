@@ -102,7 +102,7 @@ export default {
         });
     },
 
-    deleteTutorial() {
+    deleteDrone() {
       DroneService.delete(this.currentDrone.id)
         .then(response => {
           console.log(response.data);

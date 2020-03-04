@@ -3,7 +3,7 @@
     <nav class="navbar navbar-expand text-white bg-dark border border-dark justify-content-between">
       <div class="navbar-nav text-white">
         <li class="nav-item">
-          <a href="/drones" class="navbar-brand">Drone list</a>
+          <a href="/drone-list" class="navbar-brand">Drone list</a>
         </li>
         <li class="nav-item">
           <a href="/create" class="navbar-brand">New drone</a>

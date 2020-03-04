@@ -18,7 +18,7 @@
           <b-form-input
             id="name"
             v-model="drone.name"
-            :state="errors.name"
+            :state="errors.name == null ? null : !errors.name"
             aria-describedby="input-live-help input-live-feedback"
             placeholder="Ex: Jonathan"
             trim
@@ -31,7 +31,7 @@
           <b-form-input
             id="address"
             v-model="drone.address"
-            :state="errors.address"
+            :state="errors.address == null ? null : !errors.address"
             aria-describedby="input-live-help input-live-feedback"
             placeholder="Ex: Av. São João"
             trim
@@ -82,7 +82,7 @@
         <div class="form-group col-6">
           <label>Status</label>
           <b-form-select id="status" name="status" v-model="drone.status" 
-            :state="errors.status" 
+            :state="errors.status == null ? null : !errors.status" 
             v-on:input="testInput('status')">
             <b-form-select-option value="Success">Success</b-form-select-option>
             <b-form-select-option value="Delayed">Delayed</b-form-select-option>
@@ -103,8 +103,17 @@
         </div>
       </div>
 
-      <button :disabled="!(this.errors.name && this.errors.address && this.errors.status)" 
-        @click="createDrone" class="btn btn-success">Cadastrar</button>
+      <button 
+      :disabled="this.errors.name !== false || this.errors.address !== false ||
+      this.errors.status !== false" v-if="!this.drone.id" @click="createDrone" 
+      class="btn btn-success"
+      >
+        Cadastrar
+      </button>
+      <button :disabled="this.errors.name || this.errors.address || this.errors.status" 
+        v-if="this.drone.id" @click="updateDrone" class="btn btn-success">
+        Update
+      </button>
     </div>
     <img v-if="drone.image && !submitted" :src="drone.image" class="img-fluid col-4" alt="Drone image">
 
@@ -140,36 +149,6 @@ export default {
     };
   },
   methods: {
-    createDrone() {
-      var data = {
-        id: this.drone.id,
-        image: this.drone.image,
-        name: this.drone.name,
-        address: this.drone.address,
-        battery: this.drone.battery,
-        max_speed: this.drone.max_speed,
-        average_speed: this.drone.average_speed,
-        status: this.drone.status,
-        fly: this.drone.fly
-      };
-
-      DroneService.create(data)
-        .then(response => {
-          this.drone.id = response.data.id;
-          this.submitted = true;
-        })
-        .catch(e => {
-          this.errors = e.response.data;
-          this.toast('Preencha corretamente os campos obrigatórios! :D', 
-            'Campos inválidos', 'danger');
-          this.errors.name = this.errors.name ? true : false;
-          this.errors.address = this.errors.address ? true : false;
-          this.errors.status = this.errors.status ? true : false;
-          
-          console.log(e.response.data);
-        });
-    },
-
     toast(message, title, type) {
       this.$bvToast.toast(message, {
         title: title,
@@ -193,18 +172,93 @@ export default {
         fly: 0
       };
     },
-
     testInput(input) {
       if (input === 'name')
-        this.errors.name = Joi.string().min(2).max(20).required().validate(this.drone.name).error ? false : true;
+        this.errors.name = Joi.string().min(2).max(20).required().validate(this.drone.name).error ? true : false;
       if (input === 'address')
-        this.errors.address = Joi.string().min(2).max(20).required().validate(this.drone.address).error ? false : true;
+        this.errors.address = Joi.string().min(2).max(20).required().validate(this.drone.address).error ? true : false;
       if (input === 'status')
-        this.errors.status = Joi.string().min(2).max(20).required().validate(this.drone.status).error ? false : true;
+        this.errors.status = Joi.string().min(2).max(20).required().validate(this.drone.status).error ? true : false;
       console.log(this.errors.name);
       console.log(this.errors.address);
       console.log(this.errors.status);
-    }
+    },
+    getDrone(id) {
+      DroneService.detail(id)
+        .then(response => {
+          if (!response.data)
+            this.newDrone();
+          else {
+            this.drone = response.data;
+            this.errors = { name: false, address: false, status: false };
+          }
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
+    updateStatus(status) {
+      var data = {
+        status: status
+      };
+      DroneService.update(this.drone.id, data)
+        .then(response => {
+          this.drone.published = status;
+          console.log(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
+    updateDrone() {
+      DroneService.update(this.drone.id, this.drone)
+        .then(response => {
+          console.log(response.data);
+          this.toast(`Drone ${this.drone.id} was updated with success! :D`, 
+            `It's done!`, 'success');
+            setTimeout(() => {
+              this.$router.push({ name: "drone-list" });
+            }, 3000);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
+    deleteDrone() {
+      DroneService.delete(this.drone.id)
+        .then(response => {
+          console.log(response.data);
+          this.$router.push({ name: "drone-list" });
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
+    createDrone() {
+      DroneService.create(this.drone)
+        .then(response => {
+          this.toast(`Drone ${response.data.id} was created with success! :D`, 
+            `It's done!`, 'success');
+            setTimeout(() => {
+              this.$router.push({ name: "drone-list" });
+            }, 3000);
+        })
+        .catch(e => {
+          this.errors = e.response.data;
+          this.toast('Please, fill the fields correctly', 
+            'Wrong data', 'danger');
+          this.errors.name = this.errors.name ? true : false;
+          this.errors.address = this.errors.address ? true : false;
+          this.errors.status = this.errors.status ? true : false;
+          
+          console.log(e.response.data);
+      });
+    },
+  },
+  mounted() {
+    console.log(this.$route.params.id);
+    if(this.$route.params.id)
+      this.getDrone(this.$route.params.id);
   }
 };
 </script>
