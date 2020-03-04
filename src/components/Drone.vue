@@ -173,13 +173,17 @@ export default {
     };
   },
   methods: {
-    toast(message, title, type) {
-      this.$bvToast.toast(message + '\n(You will be redirected in 3 seconds)', {
+    toast(message, title, type, redirectPage) {
+      this.$bvToast.toast(message, {
         title: title,
-        toaster: 'b-toaster-top-center',
+        toaster: 'b-toaster-top-right',
         solid: false,
         variant: type
       });
+      if (redirectPage)
+        setTimeout(() => {
+          this.$router.push({ name: redirectPage });
+        }, 3000);
     },
 
     newDrone() {
@@ -228,28 +232,12 @@ export default {
           console.log(e);
         });
     },
-    updateStatus(status) {
-      var data = {
-        status: status
-      };
-      DroneService.update(this.drone.id, data)
-        .then(response => {
-          this.drone.published = status;
-          console.log(response.data);
-        })
-        .catch(e => {
-          console.log(e);
-        });
-    },
     updateDrone() {
       DroneService.update(this.drone.id, this.drone)
         .then(response => {
           console.log(response.data);
-          this.toast(`Drone ${this.drone.id} was updated with success!`, 
-            `It's done!`, 'success');
-            setTimeout(() => {
-              this.$router.push({ name: "drone-list" });
-            }, 3000);
+          this.toast(`Drone ${this.drone.id} was updated with success! + \r\n(You will be redirected in 3 seconds)`, 
+            `It's done!`, 'success', "drone-list");
         })
         .catch(e => {
           console.log(e);
@@ -286,11 +274,8 @@ export default {
     createDrone() {
       DroneService.create(this.drone)
         .then(response => {
-          this.toast(`Drone ${response.data.id} was created with success! :D`, 
-            `It's done!`, 'success');
-            setTimeout(() => {
-              this.$router.push({ name: "drone-list" });
-            }, 3000);
+          this.toast(`Drone ${response.data.id} was created with success! + \r\n(You will be redirected in 3 seconds)`, 
+            `It's done!`, 'success', "drone-list");
         })
         .catch(e => {
           this.errors = e.response.data;
