@@ -165,12 +165,16 @@ export default {
         fly: 0
       },
       submitted: false,
-      errors: {name: null, address: null, status: null}
+      errors: { 
+        name: null, 
+        address: null, 
+        status: null 
+      },
     };
   },
   methods: {
     toast(message, title, type) {
-      this.$bvToast.toast(message, {
+      this.$bvToast.toast(message + '\n(You will be redirected in 3 seconds)', {
         title: title,
         toaster: 'b-toaster-top-center',
         solid: false,
@@ -241,7 +245,7 @@ export default {
       DroneService.update(this.drone.id, this.drone)
         .then(response => {
           console.log(response.data);
-          this.toast(`Drone ${this.drone.id} was updated with success! :D`, 
+          this.toast(`Drone ${this.drone.id} was updated with success!`, 
             `It's done!`, 'success');
             setTimeout(() => {
               this.$router.push({ name: "drone-list" });
