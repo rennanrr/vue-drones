@@ -1,4 +1,8 @@
+SoluCX Full-Stack skills test - 2020-01J
+_________________________________________
 # vue-drones
+
+
 
 ## Project setup
 ```
