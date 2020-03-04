@@ -1,8 +1,16 @@
 import http from "../http-common";
 
 class TutorialDataService {
-  list() {
-    return http.get("/drones");
+  list( page, size ) {
+    return http.get("/drones?" + 
+      (size ? `pageSize=${size}` : '') + 
+      (page ? `&page=${page}` : ''));
+  }
+
+  find( text, page, size ) {
+    return http.get(`/drones?text=${text}`+ 
+    (size ? `&pageSize=${size}` : '') + 
+    (page ? `&page=${page}` : ''));
   }
 
   detail(id) {
@@ -23,10 +31,6 @@ class TutorialDataService {
   */
   create(data) {
     return http.post("/drones", data);
-  }
-
-  find(text) {
-    return http.get(`/drones?text=${text}`);
   }
 }
 

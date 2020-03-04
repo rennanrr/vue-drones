@@ -1,6 +1,6 @@
 <template>
   <div class="row">
-    <div class="col-8 text-left" v-if="!submitted">
+    <div class="col-8 text-left">
       <div class="form-group">
         <label>Imagem</label>
         <input
@@ -84,12 +84,24 @@
           <b-form-select id="status" name="status" v-model="drone.status" 
             :state="errors.status == null ? null : !errors.status" 
             v-on:input="testInput('status')">
-            <b-form-select-option value="Success">Success</b-form-select-option>
-            <b-form-select-option value="Delayed">Delayed</b-form-select-option>
-            <b-form-select-option value="Flying">Flying</b-form-select-option>
-            <b-form-select-option value="Fail">Fail</b-form-select-option>
-            <b-form-select-option value="Offline">Offline</b-form-select-option>
-            <b-form-select-option value="Charging">Charging</b-form-select-option>
+            <b-form-select-option value="Success">
+              Success
+            </b-form-select-option>
+            <b-form-select-option value="Delayed">
+              Delayed
+            </b-form-select-option>
+            <b-form-select-option value="Flying">
+              Flying
+            </b-form-select-option>
+            <b-form-select-option value="Fail">
+              Fail
+            </b-form-select-option>
+            <b-form-select-option value="Offline">
+              Offline
+            </b-form-select-option>
+            <b-form-select-option value="Charging">
+              Charging
+            </b-form-select-option>
           </b-form-select>
         </div>
 
@@ -98,7 +110,11 @@
           <b-input-group>
             <b-form-input id="fly"  v-model="drone.fly" name="fly" 
               type="range" min="0" max="100"></b-form-input>
-              <b-input-group-append><b-button disabled> {{ drone.fly }} </b-button></b-input-group-append>
+              <b-input-group-append>
+                <b-button disabled> 
+                  {{ drone.fly }} 
+                </b-button>
+              </b-input-group-append>
           </b-input-group>
         </div>
       </div>
@@ -106,22 +122,26 @@
       <button 
       :disabled="this.errors.name !== false || this.errors.address !== false ||
       this.errors.status !== false" v-if="!this.drone.id" @click="createDrone" 
-      class="btn btn-success"
+      class="btn btn-info"
       >
         Cadastrar
       </button>
       <button :disabled="this.errors.name || this.errors.address || this.errors.status" 
-        v-if="this.drone.id" @click="updateDrone" class="btn btn-success">
+        v-if="this.drone.id" @click="updateDrone" class="btn btn-info">
         Update
       </button>
+      <button :disabled="this.errors.name || this.errors.address || this.errors.status" 
+        v-if="this.drone.id" @click="deleteDrone" class="btn btn-danger float-right">
+        Delete
+      </button>
+      <div class="text-center">
+      <a class="btn btn-dark" href="/drone-list">
+        Back to list
+      </a>
+      </div>
     </div>
-    <img v-if="drone.image && !submitted" :src="drone.image" class="img-fluid col-4" alt="Drone image">
-
-    <div class="text-center" v-if="submitted">
-      <h4>Drone cadastrado com sucesso!</h4>
-      <button class="btn btn-info m-2" @click="newDrone">Cadastrar outro</button>
-      <a class="btn btn-success m-2" href="/drones">Voltar à lista</a>
-    </div>
+    <img v-if="drone.image" :src="drone.image" 
+      class="img-fluid col-4 border" alt="Drone image">
   </div>
 </template>
 
@@ -159,7 +179,6 @@ export default {
     },
 
     newDrone() {
-      this.submitted = false;
       this.drone =  {
         id: "",
         image: "",
@@ -174,20 +193,28 @@ export default {
     },
     testInput(input) {
       if (input === 'name')
-        this.errors.name = Joi.string().min(2).max(20).required().validate(this.drone.name).error ? true : false;
+        this.errors.name = Joi.string()
+          .min(2).max(20).required()
+          .validate(this.drone.name)
+          .error ? true : false;
+
       if (input === 'address')
-        this.errors.address = Joi.string().min(2).max(20).required().validate(this.drone.address).error ? true : false;
+        this.errors.address = Joi.string()
+          .min(2).max(20).required()
+          .validate(this.drone.address)
+          .error ? true : false;
+
       if (input === 'status')
-        this.errors.status = Joi.string().min(2).max(20).required().validate(this.drone.status).error ? true : false;
-      console.log(this.errors.name);
-      console.log(this.errors.address);
-      console.log(this.errors.status);
+        this.errors.status = Joi.string()
+        .min(2).max(20).required()
+        .validate(this.drone.status)
+        .error ? true : false;
     },
     getDrone(id) {
       DroneService.detail(id)
         .then(response => {
-          if (!response.data)
-            this.newDrone();
+          if (!response.data) 
+            this.$router.push({ name: "drone-list" });
           else {
             this.drone = response.data;
             this.errors = { name: false, address: false, status: false };
@@ -225,14 +252,32 @@ export default {
         });
     },
     deleteDrone() {
-      DroneService.delete(this.drone.id)
-        .then(response => {
-          console.log(response.data);
-          this.$router.push({ name: "drone-list" });
+      this.$bvModal.msgBoxConfirm(`Are you sure that you want to delete drone ${this.drone.id}?`, {
+          title: 'Confirmation',
+          size: 'sm',
+          //buttonSize: 'sm',
+          okVariant: 'danger',
+          okTitle: 'YES',
+          cancelTitle: 'NO',
+          footerClass: 'p-2',
+          hideHeaderClose: false,
+          centered: true
         })
-        .catch(e => {
-          console.log(e);
-        });
+          .then(value => {
+            if(value) {
+              DroneService.delete(this.drone.id)
+                .then(response => {
+                  console.log(response.data);
+                  this.$router.push({ name: "drone-list" });
+                })
+                .catch(e => {
+                  console.log(e);
+              });
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          })
     },
     createDrone() {
       DroneService.create(this.drone)
@@ -253,7 +298,7 @@ export default {
           
           console.log(e.response.data);
       });
-    },
+    }
   },
   mounted() {
     console.log(this.$route.params.id);

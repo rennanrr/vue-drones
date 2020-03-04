@@ -8,6 +8,7 @@
           placeholder="Type here to search"
           trim
           v-on:input="findText"
+          v-model="text"
         ></b-form-input>
       </div>  
     </div>
@@ -26,14 +27,13 @@
           </b-tr>
         </b-thead>
         <b-tbody>
-          <b-tr v-b-modal.modal-detail v-for="(drone, index) in drones" 
+          <b-tr ref="#droneItemList" v-b-modal.modal-detail v-for="(drone, index) in drones" 
             :key="index" @click="setActiveDrone(drone, index)">
             <b-th style="vertical-align: middle;">{{ drone.id }}</b-th>
             <b-td class="row text-left" style="vertical-align: middle;">
               <div class="col-2">
-                <b-img fluid v-if="drone.image" class="border"
-                  :src="drone.image" rounded="circle" 
-                  alt="Profile image"></b-img>
+                <b-img fluid class="border" :src="drone.image || '/img/drone_image.png'" 
+                rounded="circle" alt="Profile image"></b-img>
               </div>
               <div class="col-8" style="vertical-align: middle;">
                 <h5 class="mb-0 pb-0"> {{ drone.name }} </h5>
@@ -62,6 +62,11 @@
           </b-tr>
         </b-tbody>
       </b-table-simple>
+    </div>
+    <div class="mt-3">
+      <b-pagination v-model="currentPage" :total-rows="totalDrones" 
+      :per-page="pageSize" @input="text ? findText() : retrieveDrones()"
+      ></b-pagination>
     </div>
   <b-modal v-if="currentDrone.id" id="modal-detail" :title="`Drone ${currentDrone.id}`"
     header-bg-variant="dark"
@@ -148,35 +153,39 @@ export default {
     return {
       drones: [],
       currentDrone: [],
-      currentIndex: -1
+      totalDrones: 1,
+      currentPage: 1,
+      pageSize: 10,
+      text : null
     };
   },
   methods: {
+
+    refreshList() {
+      this.retrieveDrones();
+      this.currentDrone = null;
+    },
+
+    setActiveDrone(drone) {
+      this.currentDrone = drone;
+    },
+
     retrieveDrones() {
-      DroneService.list()
+      DroneService.list( this.currentPage, this.pageSize )
         .then(response => {
-          this.drones = response.data;
+          this.drones = response.data.list;
+          this.totalDrones = response.data.count;
         })
         .catch(e => {
           console.log(e);
         });
     },
-
-    refreshList() {
-      this.retrieveDrones();
-      this.currentDrone = null;
-      this.currentIndex = -1;
-    },
-
-    setActiveDrone(drone, index) {
-      this.currentDrone = drone;
-      this.currentIndex = index;
-    },
     
-    findText(text) {
-      DroneService.find(text)
+    findText() {
+      DroneService.find( this.text, this.currentPage, this.pageSize )
         .then(response => {
-          this.drones = response.data;
+          this.drones = response.data.list;
+          this.totalDrones = response.data.count;
         })
         .catch(e => {
           console.log(e);
@@ -185,14 +194,26 @@ export default {
 
     statusColor(status) {
       switch (status) {
-        case 'SUCCESS': return 'badge badge-success';
-        case 'DELAYED': return 'badge badge-warning';
-        case 'FLYING': return 'badge badge-info';
-        case 'FAIL': return 'badge badge-danger';
-        case 'OFFLINE': return 'badge badge-secondary';
-        case 'CHARGING': return 'badge badge-primary';
+
+        case 'SUCCESS': 
+          return 'badge badge-success';
+
+        case 'DELAYED': 
+          return 'badge badge-warning';
+
+        case 'FLYING': 
+          return 'badge badge-info';
+
+        case 'FAIL': 
+          return 'badge badge-danger';
+
+        case 'OFFLINE': 
+          return 'badge badge-secondary';
+
+        case 'CHARGING': 
+          return 'badge badge-primary';
       }
-    }
+    },
   },
   mounted() {
     this.retrieveDrones();
